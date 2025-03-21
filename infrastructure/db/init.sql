@@ -1,0 +1,5 @@
+CREATE DATABASE keycloak_test;
+CREATE DATABASE booking;
+CREATE DATABASE driver;
+CREATE DATABASE account;
+CREATE DATABASE passenger;

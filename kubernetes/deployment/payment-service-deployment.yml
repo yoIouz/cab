@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: cab
+        type: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          imagePullPolicy: Never
+          image: payment-service:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SERVICE_NAME
+              value: "payment-service"

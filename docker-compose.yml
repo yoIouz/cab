@@ -1,0 +1,86 @@
+name: cab
+
+services:
+  postgres:
+    image: cab_db:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./infrastructure/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./infrastructure/db/data/pgdata:/var/lib/postgresql/data
+      - ./infrastructure/db/install_pg_partman.sh:/docker-entrypoint-initdb.d/install_pg_partman.sh
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d keycloak_test -U postgres" ]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine3.21
+    container_name: redis
+    ports:
+      - "6379:6379"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  keycloak:
+    image: bitnami/keycloak:26.1.2
+    container_name: keycloak
+    ports:
+      - "8090:8090"
+    environment:
+      KEYCLOAK_HTTP_PORT: ${KEYCLOAK_PORT}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_DATABASE_HOST: ${KEYCLOAK_DB_HOST}
+      KEYCLOAK_DATABASE_USER: ${KEYCLOAK_DB_USER}
+      KEYCLOAK_DATABASE_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KEYCLOAK_DATABASE_NAME: ${KEYCLOAK_DB_NAME}
+      KEYCLOAK_EXTRA_ARGS: --import-realm
+    volumes:
+      - ./infrastructure/keycloak/realms:/opt/bitnami/keycloak/data/import
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  kafka-1:
+    container_name: kafka-1
+    image: bitnami/kafka:3.9.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_KRAFT_CLUSTER_ID: ed6c969f75a44a28
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9091
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9090,EXTERNAL://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAMES: PLAINTEXT
+    healthcheck:
+      test: "kafka-topics.sh --list --bootstrap-server localhost:9092 || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 3
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "9095:9095"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9090
+      SERVER_PORT: 9095
+    depends_on:
+      kafka-1:
+        condition: service_healthy

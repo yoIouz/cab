@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: passenger-service
+  config:
+    import: optional:configserver:http://localhost:8888
+  cloud:
+    config:
+      uri: http://localhost:8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, env
+
+server:
+  port: 8081
+  error:
+    include-message: always
