@@ -10,14 +10,14 @@
     <name>cab</name>
 
     <modules>
-<!--        <module>common</module>-->
+        <module>common</module>
         <module>cloud-config-server</module>
-<!--        <module>booking-service</module>-->
-<!--        <module>driver-service</module>-->
-<!--        <module>payment-service</module>-->
-<!--        <module>passenger-service</module>-->
-<!--        <module>eureka-server</module>-->
-<!--        <module>api-gateway</module>-->
+        <module>booking-service</module>
+        <module>driver-service</module>
+        <module>payment-service</module>
+        <module>passenger-service</module>
+        <module>eureka-server</module>
+        <module>api-gateway</module>
     </modules>
 
     <properties>
