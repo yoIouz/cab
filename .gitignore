@@ -38,3 +38,9 @@ build/
 ### Mac OS ###
 .DS_Store
 .env
+Dockerfile
+Dockerfile-db
+kubernetes/config
+kubernetes/k8s-ca.crt
+infrastructure/db/data
+artemis

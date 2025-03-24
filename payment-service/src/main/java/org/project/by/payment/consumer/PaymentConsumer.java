@@ -18,4 +18,9 @@ public class PaymentConsumer {
         paymentService.processPayment(rideCompleted);
     }
 
+//    @JmsListener(destination = "completed")
+//    public void consumeCompleted(CompletedRideEvent rideCompleted) {
+//        paymentService.processPayment(rideCompleted);
+//    }
+
 }

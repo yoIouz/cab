@@ -84,3 +84,12 @@ services:
     depends_on:
       kafka-1:
         condition: service_healthy
+
+  artemis:
+    container_name: artemis
+    image: apache/activemq-artemis:latest-alpine
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes:
+      - ./artemis/etc:/var/lib/artemis-instance/etc-override

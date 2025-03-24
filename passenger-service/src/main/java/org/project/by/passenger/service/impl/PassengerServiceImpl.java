@@ -81,7 +81,7 @@ public class PassengerServiceImpl implements PassengerService {
     }
 
     @Override
-    @CachePut(value = "history", key = "#rideCompleted.passengerId")
+    @CachePut(value = "history", key = "#rideCompleted.passengerId", unless = "#result == null")
     public void acknowledgeCompleted(RideEvent rideCompleted) {
     }
 

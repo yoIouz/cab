@@ -8,5 +8,6 @@ spring:
           uri: ${CONFIG_REPO}
           private-key: ${SSH_KEY}
           search-paths: /{application}
+          default-label: main
 server:
   port: 8888

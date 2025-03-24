@@ -90,7 +90,7 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    @CachePut(value = "history", key = "#rideCompleted.driverId")
+    @CachePut(value = "history", key = "#rideCompleted.driverId", unless = "#result == null")
     @Transactional("transactionManager")
     public void completeRide(CompletedRideEvent rideCompleted) {
         Driver driver = this.findDriverById(rideCompleted.getDriverId());
