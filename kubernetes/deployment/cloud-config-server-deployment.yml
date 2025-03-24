@@ -1,3 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-config-server
+spec:
+  selector:
+    app: cloud-config-server
+  ports:
+    - name: cloud-config-server
+      port: 8888
+      targetPort: 8888
+  type: ClusterIP
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
