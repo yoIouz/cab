@@ -3,6 +3,7 @@ package org.project.by.payment.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.project.by.common.constants.dto.PageDto;
+import org.project.by.common.constants.dto.TransactionReferenceDto;
 import org.project.by.payment.dto.TransactionDto;
 import org.project.by.payment.entity.Transaction;
 import org.springframework.data.domain.Page;
@@ -18,5 +19,9 @@ public interface PaymentMapper {
     default PageDto<TransactionDto> toTransactionDtoPage(Page<Transaction> transactions) {
         return new PageDto<>(transactions.map(this::toTransactionDto));
     }
+
+    @Mapping(source = "id", target = "txId")
+    @Mapping(source = "transactionDate", target = "date")
+    TransactionReferenceDto toTransactionReferenceDto(Transaction transaction);
 
 }

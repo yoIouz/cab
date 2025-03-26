@@ -2,8 +2,6 @@ package org.project.by.driver.service;
 
 import org.project.by.common.constants.dto.PageDto;
 import org.project.by.common.constants.dto.RidesDto;
-import org.project.by.common.constants.dto.event.AcceptedRideEvent;
-import org.project.by.common.constants.dto.event.CompletedRideEvent;
 import org.project.by.common.constants.dto.event.RideEvent;
 import org.project.by.common.constants.dto.event.UserRatingEvent;
 import org.project.by.driver.dto.DriverDto;
@@ -21,10 +19,10 @@ public interface DriverService {
 
     PageDto<RidesDto> getRideHistory(Long driverId, Pageable pageable);
 
-    void completeRide(CompletedRideEvent rideCompleted);
+    void completeRide(RideEvent rideCompleted);
 
     void cancelRide(RideEvent rideCancelled);
 
-    void acceptRide(AcceptedRideEvent rideAccepted);
+    void acceptRide(RideEvent rideAccepted);
 
 }

@@ -1,24 +1,24 @@
 package org.project.by.payment;
 
-import org.project.by.common.constants.dto.event.CompletedRideEvent;
+import org.project.by.common.constants.dto.event.RideEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class CompletedRideBuilder {
 
-    private final CompletedRideEvent event;
+    private final RideEvent event;
 
-    public CompletedRideBuilder(CompletedRideEvent event) {
+    public CompletedRideBuilder(RideEvent event) {
         this.event = event;
     }
 
     public static CompletedRideBuilder createCompletedRideBuilder() {
-        return new CompletedRideBuilder(new CompletedRideEvent());
+        return new CompletedRideBuilder(new RideEvent());
     }
 
     public CompletedRideBuilder completedTime(LocalDateTime time) {
-        event.setCompletedTime(time);
+        event.setDate(time);
         return this;
     }
 
@@ -32,7 +32,7 @@ public class CompletedRideBuilder {
         return this;
     }
 
-    public CompletedRideEvent build() {
+    public RideEvent build() {
         return event;
     }
 

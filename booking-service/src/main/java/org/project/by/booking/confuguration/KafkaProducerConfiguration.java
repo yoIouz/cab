@@ -5,15 +5,9 @@ import org.project.by.common.constants.kafka.KafkaConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
-import org.springframework.kafka.support.converter.StringJsonMessageConverter;
 
 @Configuration
 public class KafkaProducerConfiguration {
-
-    @Bean
-    public StringJsonMessageConverter stringJsonMessageConverter() {
-        return new StringJsonMessageConverter();
-    }
 
     @Bean
     public NewTopic requestTopic() {

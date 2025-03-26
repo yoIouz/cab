@@ -2,7 +2,8 @@ package org.project.by.payment.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.project.by.common.constants.dto.PageDto;
-import org.project.by.common.constants.dto.event.CompletedRideEvent;
+import org.project.by.common.constants.dto.event.RideEvent;
+import org.project.by.common.constants.dto.event.SucceededPaymentEvent;
 import org.project.by.payment.dto.TransactionDto;
 import org.project.by.payment.entity.Transaction;
 import org.project.by.payment.entity.UserBalance;
@@ -10,6 +11,7 @@ import org.project.by.payment.mapper.PaymentMapper;
 import org.project.by.payment.repository.TransactionRepository;
 import org.project.by.payment.repository.UserBalanceRepository;
 import org.project.by.payment.service.PaymentService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,9 +29,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentMapper paymentMapper;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     @Override
     @Transactional
-    public void processPayment(CompletedRideEvent event) {
+    public void processPayment(RideEvent event) {
         Long passengerId = event.getPassengerId();
         BigDecimal price = event.getPrice();
         UserBalance userBalance = userBalanceRepository.findByUserId(passengerId)
@@ -41,10 +45,13 @@ public class PaymentServiceImpl implements PaymentService {
         Transaction transaction = new Transaction();
         transaction.setUserId(userBalance.getUserId());
         transaction.setAmount(price.negate());
-        transaction.setTransactionDate(event.getCompletedTime());
+        transaction.setTransactionDate(event.getDate());
 
         userBalanceRepository.save(userBalance);
-        transactionRepository.save(transaction);
+        Transaction savedTx = transactionRepository.save(transaction);
+        SucceededPaymentEvent succeededPaymentEvent =
+                new SucceededPaymentEvent(passengerId, price, paymentMapper.toTransactionReferenceDto(savedTx));
+        eventPublisher.publishEvent(succeededPaymentEvent);
     }
 
     @Override

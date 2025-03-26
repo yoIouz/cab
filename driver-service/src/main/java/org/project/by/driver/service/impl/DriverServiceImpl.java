@@ -4,8 +4,6 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.project.by.common.constants.dto.PageDto;
 import org.project.by.common.constants.dto.RidesDto;
-import org.project.by.common.constants.dto.event.AcceptedRideEvent;
-import org.project.by.common.constants.dto.event.CompletedRideEvent;
 import org.project.by.common.constants.dto.event.RideEvent;
 import org.project.by.common.constants.dto.event.UserRatingEvent;
 import org.project.by.driver.dto.DriverDto;
@@ -71,7 +69,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional("transactionManager")
-    public void acceptRide(AcceptedRideEvent rideAccepted) {
+    public void acceptRide(RideEvent rideAccepted) {
         Driver driver = this.findDriverById(rideAccepted.getDriverId());
         DriverStatus driverStatus = driver.getIsBusy();
         if (Objects.nonNull(driverStatus) && !driverStatus.getIsBusy()) {
@@ -92,7 +90,7 @@ public class DriverServiceImpl implements DriverService {
     @Override
     @CachePut(value = "history", key = "#rideCompleted.driverId", unless = "#result == null")
     @Transactional("transactionManager")
-    public void completeRide(CompletedRideEvent rideCompleted) {
+    public void completeRide(RideEvent rideCompleted) {
         Driver driver = this.findDriverById(rideCompleted.getDriverId());
         DriverStatus driverStatus = driver.getIsBusy();
         if (Objects.nonNull(driverStatus)) {

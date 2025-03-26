@@ -15,6 +15,8 @@ public class KafkaConstants {
 
     public final String PAYMENT_TOPIC = "payment";
 
+    public final String SUSPICIOUS_PAYMENT_TOPIC = "suspicious_payment";
+
     public final String RATING_TOPIC = "rating";
 
     public final String REQUEST_TOPIC = "request";

@@ -11,7 +11,6 @@ import org.project.by.booking.service.PricingService;
 import org.project.by.common.constants.dto.PageDto;
 import org.project.by.common.constants.dto.RidesDto;
 import org.project.by.common.constants.dto.event.BookingRequestEvent;
-import org.project.by.common.constants.dto.event.CompletedRideEvent;
 import org.project.by.common.constants.dto.event.RideEvent;
 import org.project.by.common.constants.enums.RideStatus;
 import org.springframework.data.domain.Page;
@@ -59,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void completeRide(CompletedRideEvent rideCompleted) {
+    public void completeRide(RideEvent rideCompleted) {
         Ride ride = this.findRideById(rideCompleted.getRideId());
         ride.setStatus(RideStatus.COMPLETED);
         bookingRepository.save(ride);

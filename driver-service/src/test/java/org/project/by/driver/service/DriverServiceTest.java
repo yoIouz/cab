@@ -8,8 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.project.by.common.constants.dto.event.AcceptedRideEvent;
-import org.project.by.common.constants.dto.event.CompletedRideEvent;
+import org.project.by.common.constants.dto.event.RideEvent;
 import org.project.by.common.constants.dto.event.UserRatingEvent;
 import org.project.by.driver.SucceededWatcher;
 import org.project.by.driver.dto.DriverDto;
@@ -117,8 +116,8 @@ public class DriverServiceTest {
     @ValueSource(booleans = {true, false})
     void shouldAcceptRide(Boolean isBusy) {
         Long driverId = 1L;
-        AcceptedRideEvent acceptedRideEvent = new AcceptedRideEvent();
-        acceptedRideEvent.setAcceptanceTime(LocalDateTime.of(2025, 3, 13, 12, 0));
+        RideEvent acceptedRideEvent = new RideEvent();
+        acceptedRideEvent.setDate(LocalDateTime.of(2025, 3, 13, 12, 0));
         acceptedRideEvent.setPrice(new BigDecimal("30.00"));
         acceptedRideEvent.setDriverId(driverId);
         acceptedRideEvent.setRideId(1L);
@@ -130,7 +129,7 @@ public class DriverServiceTest {
         driver.setName("Ахмед");
         DriverStatus driverStatus = new DriverStatus(driverId, driver, isBusy);
         driver.setIsBusy(driverStatus);
-        ArgumentCaptor<AcceptedRideEvent> eventCaptor = ArgumentCaptor.forClass(AcceptedRideEvent.class);
+        ArgumentCaptor<RideEvent> eventCaptor = ArgumentCaptor.forClass(RideEvent.class);
 
         when(driverRepository.findById(driverId)).thenReturn(Optional.of(driver));
         driverService.acceptRide(acceptedRideEvent);
@@ -150,8 +149,8 @@ public class DriverServiceTest {
     @Test
     void shouldCompleteRide() {
         Long driverId = 1L;
-        CompletedRideEvent completedRide = new CompletedRideEvent();
-        completedRide.setCompletedTime(LocalDateTime.of(2025, 3, 13, 12, 0));
+        RideEvent completedRide = new RideEvent();
+        completedRide.setDate(LocalDateTime.of(2025, 3, 13, 12, 0));
         completedRide.setPrice(new BigDecimal("30.00"));
         completedRide.setDriverId(driverId);
         completedRide.setRideId(1L);
@@ -163,7 +162,7 @@ public class DriverServiceTest {
         driver.setName("Ахмед");
         DriverStatus driverStatus = new DriverStatus(driverId, driver, Boolean.TRUE);
         driver.setIsBusy(driverStatus);
-        ArgumentCaptor<CompletedRideEvent> eventCaptor = ArgumentCaptor.forClass(CompletedRideEvent.class);
+        ArgumentCaptor<RideEvent> eventCaptor = ArgumentCaptor.forClass(RideEvent.class);
         ArgumentCaptor<Driver> driverCaptor = ArgumentCaptor.forClass(Driver.class);
 
         when(driverRepository.findById(driverId)).thenReturn(Optional.of(driver));

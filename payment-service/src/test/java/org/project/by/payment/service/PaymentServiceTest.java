@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.project.by.common.constants.dto.PageDto;
-import org.project.by.common.constants.dto.event.CompletedRideEvent;
+import org.project.by.common.constants.dto.event.RideEvent;
 import org.project.by.payment.CompletedRideBuilder;
 import org.project.by.payment.SucceededWatcher;
 import org.project.by.payment.dto.TransactionDto;
@@ -55,7 +55,7 @@ class PaymentServiceTest {
         BigDecimal price = new BigDecimal("100.00");
         LocalDateTime completedTime = LocalDateTime.now();
 
-        CompletedRideEvent event = CompletedRideBuilder.createCompletedRideBuilder()
+        RideEvent event = CompletedRideBuilder.createCompletedRideBuilder()
                 .passengerId(passengerId)
                 .completedTime(completedTime)
                 .price(price)
@@ -76,7 +76,7 @@ class PaymentServiceTest {
         Long passengerId = 1L;
         BigDecimal price = new BigDecimal("100.00");
         LocalDateTime completedTime = LocalDateTime.now();
-        CompletedRideEvent event = CompletedRideBuilder.createCompletedRideBuilder()
+        RideEvent event = CompletedRideBuilder.createCompletedRideBuilder()
                 .passengerId(passengerId)
                 .completedTime(completedTime)
                 .price(price)
@@ -96,7 +96,7 @@ class PaymentServiceTest {
         Long passengerId = 1L;
         BigDecimal price = new BigDecimal("600.00");
         LocalDateTime completedTime = LocalDateTime.now();
-        CompletedRideEvent event = CompletedRideBuilder.createCompletedRideBuilder()
+        RideEvent event = CompletedRideBuilder.createCompletedRideBuilder()
                 .passengerId(passengerId)
                 .completedTime(completedTime)
                 .price(price)
