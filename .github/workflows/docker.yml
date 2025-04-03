@@ -9,7 +9,10 @@ on:
 env:
   REGISTRY: localhost:5000
   SERVICE_NAME: passenger-service 
-  IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.SERVICE_NAME }}
+  
+  IMAGE_NAME: "${{ env.REGISTRY }}/${{ env.SERVICE_NAME }}"
+  LATEST_TAG: "${{ env.IMAGE_NAME }}:latest"
+  SHA_TAG: "${{ env.IMAGE_NAME }}:${{ github.sha }}"
 
 jobs:
   test:
