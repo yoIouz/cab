@@ -1,4 +1,4 @@
-name: Docker CI/CD
+name: Multi-module CI/CD
 
 on:
   push:
@@ -7,45 +7,109 @@ on:
     branches: [ master ]
 
 env:
-  REGISTRY: localhost:5000
-  SERVICE_NAME: passenger-service 
-  IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.SERVICE_NAME }}
+  REGISTRY_URL: "localhost:5000"
+  TESTCONTAINERS_RYUK_DISABLED: "true"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 jobs:
-  test:
+  build-common:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: 19
+        distribution: temurin
+    
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.m2/repository
+          **/target
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+    
+    - name: Install common module
+      working-directory: ./common
+      run: mvn clean install -DskipTests
+      
+  test-modules:
+    needs: build-common
     runs-on: ubuntu-latest
     services:
       registry:
         image: registry:2
         ports:
           - 5000:5000
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+
+    strategy:
+      matrix:
+        module: ["passenger-service"]
+      fail-fast: false
+
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up JDK 19
-        uses: actions/setup-java@v3
-        with:
-          java-version: '19'
-          distribution: 'temurin'
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: 19
+        distribution: temurin
 
-      - name: Run tests
-        run: ./mvnw test
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.m2/repository
+          **/target
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    - name: Configure Testcontainers
+      run: |
+        echo "TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal" >> $GITHUB_ENV
+        echo "DATABASE_URL=jdbc:postgresql://postgres:5432/test" >> $GITHUB_ENV
+
+    - name: Test module ${{ matrix.module }}
+      working-directory: ./${{ matrix.module }}
+      run: |
+        mvn test -Dspring.datasource.url=$DATABASE_URL
 
   build-and-push:
-    needs: test
+    needs: test-modules
     runs-on: ubuntu-latest
     services:
       registry:
         image: registry:2
         ports:
           - 5000:5000
+
+    strategy:
+      matrix:
+        service: ["passenger-service"] 
+
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Log in to Registry
-        run: echo "No auth for local registry"
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-      - name: Build and push
-        run: |
-          docker build --build-arg SERVICE_NAME=${{ env.SERVICE_NAME }} -t ${{ env.IMAGE_NAME }}:latest .
-          docker push ${{ env.IMAGE_NAME }}:latest
+    - name: Build ${{ matrix.service }}
+      run: |
+        docker build \
+          --build-arg MODULE_NAME=${{ matrix.service }} \
+          -t ${{ env.REGISTRY_URL }}/${{ matrix.service }}:latest \
+          -f ./${{ matrix.service }}/Dockerfile .
+
+    - name: Push ${{ matrix.service }}
+      run: |
+        docker push ${{ env.REGISTRY_URL }}/${{ matrix.service }}:latest
