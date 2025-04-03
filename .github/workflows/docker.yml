@@ -82,7 +82,7 @@ jobs:
     - name: Test module ${{ matrix.module }}
       working-directory: ./${{ matrix.module }}
       run: |
-        mvn test -Dspring.datasource.url=$DATABASE_URL mvn test -Dcommon.version=${{ needs.build-common.outputs.common-version }}
+        mvn test -Dspring.datasource.url=$DATABASE_URL -Dcommon.version=${{ needs.build-common.outputs.common-version }}
 
   build-and-push:
     needs: test-modules
