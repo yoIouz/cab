@@ -36,6 +36,7 @@ jobs:
       run: mvn clean install -DskipTests
       
   test-modules:
+    needs: build-common
     runs-on: ubuntu-latest
     services:
       registry:
