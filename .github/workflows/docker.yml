@@ -2,14 +2,14 @@ name: Docker CI/CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 env:
-  REGISTRY: localhost:5000
-  SERVICE_NAME: passenger-service 
-  
+  REGISTRY: "localhost:5000"
+  SERVICE_NAME: "passenger-service"
+ 
   IMAGE_NAME: "${{ env.REGISTRY }}/${{ env.SERVICE_NAME }}"
   LATEST_TAG: "${{ env.IMAGE_NAME }}:latest"
   SHA_TAG: "${{ env.IMAGE_NAME }}:${{ github.sha }}"
@@ -24,13 +24,13 @@ jobs:
           - 5000:5000
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Set up JDK 19
         uses: actions/setup-java@v3
         with:
           java-version: '19'
           distribution: 'temurin'
-
+      
       - name: Run tests
         run: ./mvnw test
 
@@ -44,11 +44,13 @@ jobs:
           - 5000:5000
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Log in to Registry
         run: echo "No auth for local registry"
-
+      
       - name: Build and push
         run: |
-          docker build --build-arg SERVICE_NAME=${{ env.SERVICE_NAME }} -t ${{ env.IMAGE_NAME }}:latest .
-          docker push ${{ env.IMAGE_NAME }}:latest
+          docker build --build-arg SERVICE_NAME=${{ env.SERVICE_NAME }} -t ${{ env.LATEST_TAG }} .
+          docker push ${{ env.LATEST_TAG }}
+          docker tag ${{ env.LATEST_TAG }} ${{ env.SHA_TAG }}
+          docker push ${{ env.SHA_TAG }}
