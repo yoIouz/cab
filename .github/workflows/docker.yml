@@ -1,4 +1,4 @@
-name: Github CI
+name: Multi-module CI/CD
 
 on:
   push:
@@ -8,61 +8,84 @@ on:
 
 env:
   REGISTRY_URL: "localhost:5000"
-  SERVICE_NAME: "passenger-service"
-  IMAGE_TAG: "latest"
+  TESTCONTAINERS_RYUK_DISABLED: "true"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 jobs:
-  test:
+  test-modules:
     runs-on: ubuntu-latest
     services:
       registry:
         image: registry:2
         ports:
           - 5000:5000
-    
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+
+    strategy:
+      matrix:
+        module: ["common", "passenger-service"]
+      fail-fast: false
+
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Set up JDK
+
+    - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
-        java-version: '19'
-        distribution: 'temurin'
-    
-    - name: Run tests
-      run: mvn test
+        java-version: 19
+        distribution: temurin
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.m2/repository
+          **/target
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    - name: Configure Testcontainers
+      run: |
+        echo "TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal" >> $GITHUB_ENV
+        echo "DATABASE_URL=jdbc:postgresql://postgres:5432/test" >> $GITHUB_ENV
+
+    - name: Test module ${{ matrix.module }}
+      working-directory: ./${{ matrix.module }}
+      run: |
+        mvn test -Dspring.datasource.url=$DATABASE_URL
 
   build-and-push:
-    needs: test
+    needs: test-modules
     runs-on: ubuntu-latest
     services:
       registry:
         image: registry:2
         ports:
           - 5000:5000
-    
+
+    strategy:
+      matrix:
+        service: ["common", "passenger-service"] 
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-    
-    - name: Build and push
-      env:
-        # Динамический тег для коммитов
-        COMMIT_TAG: ${{ github.sha }}
+
+    - name: Build ${{ matrix.service }}
       run: |
         docker build \
-          --build-arg SERVICE_NAME=${{ env.SERVICE_NAME }} \
-          -t ${{ env.REGISTRY_URL }}/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }} \
-          -t ${{ env.REGISTRY_URL }}/${{ env.SERVICE_NAME }}:${{ env.COMMIT_TAG }} \
-          .
-        
-        docker push ${{ env.REGISTRY_URL }}/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}
-        docker push ${{ env.REGISTRY_URL }}/${{ env.SERVICE_NAME }}:${{ env.COMMIT_TAG }}
-    
-    - name: Print success
+          --build-arg MODULE_NAME=${{ matrix.service }} \
+          -t ${{ env.REGISTRY_URL }}/${{ matrix.service }}:latest \
+          -f ./${{ matrix.service }}/Dockerfile .
+
+    - name: Push ${{ matrix.service }}
       run: |
-        echo "Successfully built and pushed:"
-        echo "${{ env.REGISTRY_URL }}/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}"
-        echo "${{ env.REGISTRY_URL }}/${{ env.SERVICE_NAME }}:${{ env.COMMIT_TAG }}"
+        docker push ${{ env.REGISTRY_URL }}/${{ matrix.service }}:latest
