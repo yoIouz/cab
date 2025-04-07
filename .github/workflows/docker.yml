@@ -69,9 +69,6 @@ jobs:
           java-version: 19
           distribution: temurin
 
-      - name: Install common module
-        run: mvn install -pl common -DskipTests
-
       - name: Set DB env
         run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
 
