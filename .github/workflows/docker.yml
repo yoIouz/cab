@@ -21,18 +21,8 @@ jobs:
         run: |
           echo "image-prefix=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-  registry-setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Login
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
   test-modules:
-    needs: [rename-repo, registry-setup]
+    needs: rename-repo
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -59,8 +49,12 @@ jobs:
       - name: Install dependencies for all modules
         run: mvn clean install -DskipTests
 
-      - name: Set DB env
-        run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
+      - name: Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull and retag db image
         run: |
