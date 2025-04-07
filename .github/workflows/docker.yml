@@ -41,28 +41,28 @@ jobs:
       working-directory: ./common
       run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
 
-  test-modules:
-    needs: build-common
-    runs-on: ubuntu-latest
+test-modules:
+  needs: build-common
+  runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        module: ["passenger-service"]
-      fail-fast: false
+  strategy:
+    matrix:
+      module: ["passenger-service"]
+    fail-fast: false
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        ports:
-          - 5432:5432
+  services:
+    postgres:
+      image: postgres:15
+      env:
+        POSTGRES_USER: test
+        POSTGRES_PASSWORD: test
+        POSTGRES_DB: test
+      ports:
+        - 5432:5432
 
-    steps:
+  steps:
     - uses: actions/checkout@v4
-        
+
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
@@ -77,17 +77,16 @@ jobs:
           **/target
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
-    - name: Configure environment for Testcontainers
-      run: |
-        echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
-      
     - name: Install common module
       working-directory: ./common
       run: mvn install -DskipTests
 
+    - name: Set DB env
+      run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
+
     - name: Run tests for ${{ matrix.module }}
       working-directory: ./${{ matrix.module }}
-      run: mvn test -Dspring.datasource.url=$DATABASE_URL -Dcommon.version=${{ needs.build-common.outputs.common-version }}
+      run: mvn test -Dspring.datasource.url=$DATABASE_URL
 
   build-and-push:
     needs: test-modules
