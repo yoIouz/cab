@@ -57,6 +57,18 @@ jobs:
             **/target
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and retag custom Postgres image
+        run: |
+          docker pull ghcr.io/yoiouz/repo/cab_db:latest
+          docker tag ghcr.io/yoiouz/repo/cab_db:latest cab_db:latest
+
       - name: Install dependencies for all modules
         run: mvn clean install -DskipTests
 
