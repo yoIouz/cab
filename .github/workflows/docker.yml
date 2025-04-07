@@ -14,9 +14,10 @@ jobs:
   rename-repo:
     runs-on: ubuntu-latest
     outputs:
-      image-prefix: ${{ steps.lower.outputs.image-prefix }}
+      image-prefix: ${{ steps.set-prefix.outputs.image-prefix }}
     steps:
-      - id: lower
+      - name: Set lowercase IMAGE_PREFIX
+        id: set-prefix
         run: |
           echo "image-prefix=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
@@ -33,8 +34,8 @@ jobs:
 
       - name: Pull and retag db image
         run: |
-          docker pull $image-prefix/cab_db:latest
-          docker tag $image-prefix/cab_db:latest cab_db:latest
+          docker pull ${{ needs.prepare.outputs.image-prefix }}/cab_db:latest
+          docker tag ${{ needs.prepare.outputs.image-prefix }}/cab_db:latest cab_db:latest
 
   test-modules:
     needs: registry-setup
