@@ -34,8 +34,8 @@ jobs:
 
       - name: Pull and retag db image
         run: |
-          docker pull ${{ needs.prepare.outputs.image-prefix }}/cab_db:latest
-          docker tag ${{ needs.prepare.outputs.image-prefix }}/cab_db:latest cab_db:latest
+          docker pull ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest
+          docker tag ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest cab_db:latest
 
   test-modules:
     needs: registry-setup
@@ -88,7 +88,7 @@ jobs:
         run: |
           docker build \
             --build-arg SERVICE_NAME=${{ matrix.service }} \
-            -t ${{ needs.prepare.outputs.image-prefix }}/${{ matrix.service }}:latest \
+            -t ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest \
             -f ./Dockerfile .
       - name: Push ${{ matrix.service }}
         run: |
