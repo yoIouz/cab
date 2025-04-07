@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.kafka.support.serializer.JsonDeserializer.TRUSTED_PACKAGES;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,6 +59,7 @@ public class PassengerControllerIntegrationTest implements KafkaTestContainer, P
         consumerProperties =
                 KafkaTestUtils.consumerProps(kafkaContainer.getBootstrapServers(), "test-consumer");
         consumerProperties.put(VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());
+        consumerProperties.put(TRUSTED_PACKAGES, "org.project.by.common.constants.dto.event");
     }
 
     @Test
@@ -94,7 +96,7 @@ public class PassengerControllerIntegrationTest implements KafkaTestContainer, P
                     Integer.parseInt(KafkaConstants.DRIVER_RATING_PARTITION))));
             ConsumerRecord<String, String> record =
                     KafkaTestUtils.getSingleRecord(consumer, KafkaConstants.RATING_TOPIC);
-            UserRatingEvent value = objectMapper.readValue(record.value(), UserRatingEvent.class);
+            UserRatingEvent value = objectMapper.convertValue(record.value(), UserRatingEvent.class);
 
             assertThat(value).usingRecursiveComparison().isEqualTo(userRatingEvent);
         }
@@ -141,7 +143,7 @@ public class PassengerControllerIntegrationTest implements KafkaTestContainer, P
             consumer.subscribe(Collections.singleton(KafkaConstants.REQUEST_TOPIC));
             ConsumerRecord<String, String> record =
                     KafkaTestUtils.getSingleRecord(consumer, KafkaConstants.REQUEST_TOPIC);
-            BookingRequestEvent value = objectMapper.readValue(record.value(), BookingRequestEvent.class);
+            BookingRequestEvent value = objectMapper.convertValue(record.value(), BookingRequestEvent.class);
 
             assertThat(value).usingRecursiveComparison().isEqualTo(dto);
         }

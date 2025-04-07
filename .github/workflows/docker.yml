@@ -69,14 +69,6 @@ jobs:
           java-version: 19
           distribution: temurin
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.m2/repository
-            **/target
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-
       - name: Install common module
         run: mvn install -pl common -DskipTests
 

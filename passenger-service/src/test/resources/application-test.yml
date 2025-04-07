@@ -6,6 +6,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: earliest
       enable-auto-commit: false
+      properties:
+        spring.json.trusted.packages: org.project.by.common.constants.dto.event
     producer:
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
