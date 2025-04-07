@@ -12,7 +12,6 @@ env:
 
 jobs:
   test-modules:
-    needs: build-common
     runs-on: ubuntu-latest
 
     strategy:
