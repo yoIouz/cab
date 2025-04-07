@@ -65,7 +65,7 @@ jobs:
         run: mvn clean test -pl ${{ matrix.module }} -Dspring.datasource.url=$DATABASE_URL
 
   push:
-    needs: test-modules
+    needs: [test-modules, rename-repo]
     runs-on: ubuntu-latest
     strategy:
       matrix:
