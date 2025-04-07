@@ -11,7 +11,38 @@ env:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 jobs:
+  build-common:
+    runs-on: ubuntu-latest
+    outputs:
+      common-version: ${{ steps.get-version.outputs.version }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: 19
+        distribution: temurin
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.m2/repository
+          **/target
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    - name: Build common module
+      working-directory: ./common
+      run: mvn clean compile -DskipTests
+
+    - name: Get common version
+      id: get-version
+      working-directory: ./common
+      run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+
   test-modules:
+    needs: build-common
     runs-on: ubuntu-latest
 
     strategy:
@@ -45,6 +76,9 @@ jobs:
             ~/.m2/repository
             **/target
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+      - name: Install common module
+        run: mvn clean install -pl common -DskipTests
 
       - name: Set DB env
         run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
