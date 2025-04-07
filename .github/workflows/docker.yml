@@ -34,8 +34,8 @@ jobs:
 
       - name: Pull and retag db image
         run: |
-          docker pull ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest
-          docker tag ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest cab_db:latest
+          docker pull ${{ needs.rename-repo.outputs.image-prefix }}/repo/cab_db:latest
+          docker tag ${{ needs.rename-repo.outputs.image-prefix }}/repo/cab_db:latest cab_db:latest
 
   test-modules:
     needs: registry-setup
