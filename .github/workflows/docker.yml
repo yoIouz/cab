@@ -54,7 +54,7 @@ jobs:
 
       - name: Run tests for ${{ matrix.module }}
         working-directory: ./${{ matrix.module }}
-        run: mvn test -pl passenger-service -Dspring.datasource.url=$DATABASE_URL
+        run: mvn test -Dspring.datasource.url=$DATABASE_URL
 
   build-and-push:
     needs: test-modules
