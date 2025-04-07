@@ -86,7 +86,7 @@ jobs:
           docker build \
             --build-arg MODULE_NAME=${{ matrix.service }} \
             -t ghcr.io/yoiouz/repo/${{ matrix.service }}:latest \
-            -f ./${{ matrix.service }}/Dockerfile .
+            -f ./Dockerfile .
       - name: Push ${{ matrix.service }}
         run: |
           docker push ${{ env.REGISTRY_URL }}/${{ matrix.service }}:latest
