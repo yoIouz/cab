@@ -53,8 +53,8 @@ jobs:
         run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
 
       - name: Run tests for ${{ matrix.module }}
-        working-directory: ./${{ matrix.module }}
-        run: mvn clean test -Dspring.datasource.url=$DATABASE_URL
+        run: mvn clean test -pl passenger-service -Dspring.datasource.url=$DATABASE_URL
+
   build-and-push:
     needs: test-modules
     runs-on: ubuntu-latest
