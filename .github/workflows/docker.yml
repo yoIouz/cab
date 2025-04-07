@@ -30,16 +30,6 @@ jobs:
         module: ["passenger-service"]
       fail-fast: false
 
-    services:
-      postgres:
-        image: ghcr.io/yoiouz/repo/cab_db:latest
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        ports:
-          - 5432:5432
-
     steps:
       - uses: actions/checkout@v4
 
