@@ -68,7 +68,7 @@ jobs:
       - name: Run tests for ${{ matrix.module }}
         run: mvn clean test -pl passenger-service -Dspring.datasource.url=$DATABASE_URL
 
-  build-and-push:
+  push:
     needs: test-modules
     runs-on: ubuntu-latest
     strategy:
@@ -85,7 +85,7 @@ jobs:
         run: |
           docker build \
             --build-arg MODULE_NAME=${{ matrix.service }} \
-            -t ${{ env.REGISTRY_URL }}/${{ matrix.service }}:latest \
+            -t ghcr.io/yoiouz/repo/${{ matrix.service }}:latest \
             -f ./${{ matrix.service }}/Dockerfile .
       - name: Push ${{ matrix.service }}
         run: |
