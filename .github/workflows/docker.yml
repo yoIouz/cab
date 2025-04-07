@@ -11,7 +11,19 @@ env:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 jobs:
+  registry-login:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
   test-modules:
+    needs: registry-login
     runs-on: ubuntu-latest
 
     strategy:
@@ -21,7 +33,7 @@ jobs:
 
     services:
       postgres:
-        image: repo/cab_db
+        image: repo/cab_db:latest
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
