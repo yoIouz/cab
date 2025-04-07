@@ -32,11 +32,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull and retag db image
-        run: |
-          docker pull ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest
-          docker tag ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest cab_db:latest
-
   test-modules:
     needs: registry-setup
     runs-on: ubuntu-latest
@@ -68,8 +63,13 @@ jobs:
       - name: Set DB env
         run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
 
+      - name: Pull and retag db image
+        run: |
+          docker pull ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest
+          docker tag ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest cab_db:latest
+
       - name: Run tests for ${{ matrix.module }}
-        run: mvn clean test -pl {{ matrix.module }} -Dspring.datasource.url=$DATABASE_URL
+        run: mvn clean test -pl ${{ matrix.module }} -Dspring.datasource.url=$DATABASE_URL
 
   push:
     needs: test-modules
