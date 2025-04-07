@@ -6,12 +6,12 @@ on:
 
 env:
   GHCR_REGISTRY: ghcr.io
-  GHCR_IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
   TESTCONTAINERS_RYUK_DISABLED: "true"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 jobs:
-  registry-login:
+  registry-setup:
     runs-on: ubuntu-latest
     steps:
       - name: Login
@@ -20,6 +20,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and retag db image
+        run: |
+          docker pull $IMAGE_PREFIX/cab_db:latest
+          docker tag $IMAGE_PREFIX/cab_db:latest cab_db:latest
 
   test-modules:
     needs: registry-login
@@ -47,18 +52,6 @@ jobs:
             **/target
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull and retag custom Postgres image
-        run: |
-          docker pull ghcr.io/yoiouz/repo/cab_db:latest
-          docker tag ghcr.io/yoiouz/repo/cab_db:latest cab_db:latest
-
       - name: Install dependencies for all modules
         run: mvn clean install -DskipTests
 
@@ -84,8 +77,8 @@ jobs:
       - name: Build ${{ matrix.service }}
         run: |
           docker build \
-            --build-arg MODULE_NAME=${{ matrix.service }} \
-            -t ghcr.io/yoiouz/repo/${{ matrix.service }}:latest \
+            --build-arg SERVICE_NAME=${{ matrix.service }} \
+            -t $IMAGE_PREFIX/${{ matrix.service }}:latest \
             -f ./Dockerfile .
       - name: Push ${{ matrix.service }}
         run: |
