@@ -22,7 +22,6 @@ jobs:
           echo "image-prefix=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
   registry-setup:
-    needs: rename-repo
     runs-on: ubuntu-latest
     steps:
       - name: Login
@@ -33,7 +32,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
   test-modules:
-    needs: registry-setup
+    needs: [rename-repo, registry-setup]
     runs-on: ubuntu-latest
     strategy:
       matrix:
