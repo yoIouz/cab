@@ -32,9 +32,9 @@ jobs:
           **/target
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
-    - name: Install common module
+    - name: Build common module
       working-directory: ./common
-      run: mvn clean install -DskipTests
+      run: mvn clean compile -DskipTests
 
     - name: Get common version
       id: get-version
@@ -78,7 +78,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
       - name: Install common module
-        working-directory: ./common
         run: mvn install -DskipTests
 
       - name: Set DB env
