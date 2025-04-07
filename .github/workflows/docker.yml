@@ -11,7 +11,17 @@ env:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 jobs:
+  rename-repo:
+    runs-on: ubuntu-latest
+    outputs:
+      image-prefix: ${{ steps.lower.outputs.image-prefix }}
+    steps:
+      - id: lower
+        run: |
+          echo "image-prefix=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
   registry-setup:
+    needs: rename-repo
     runs-on: ubuntu-latest
     steps:
       - name: Login
@@ -23,13 +33,12 @@ jobs:
 
       - name: Pull and retag db image
         run: |
-          docker pull $IMAGE_PREFIX/cab_db:latest
-          docker tag $IMAGE_PREFIX/cab_db:latest cab_db:latest
+          docker pull ${{ needs.prepare.outputs.image-prefix }}/cab_db:latest
+          docker tag ${{ needs.prepare.outputs.image-prefix }}/cab_db:latest cab_db:latest
 
   test-modules:
     needs: registry-setup
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         module: ["passenger-service"]
@@ -59,7 +68,7 @@ jobs:
         run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
 
       - name: Run tests for ${{ matrix.module }}
-        run: mvn clean test -pl passenger-service -Dspring.datasource.url=$DATABASE_URL
+        run: mvn clean test -pl {{ matrix.module }} -Dspring.datasource.url=$DATABASE_URL
 
   push:
     needs: test-modules
@@ -78,7 +87,7 @@ jobs:
         run: |
           docker build \
             --build-arg SERVICE_NAME=${{ matrix.service }} \
-            -t $IMAGE_PREFIX/${{ matrix.service }}:latest \
+            -t ${{ needs.prepare.outputs.image-prefix }}/${{ matrix.service }}:latest \
             -f ./Dockerfile .
       - name: Push ${{ matrix.service }}
         run: |
