@@ -13,7 +13,6 @@ env:
 jobs:
   registry-login:
     runs-on: ubuntu-latest
-
     steps:
       - name: Login
         uses: docker/login-action@v3
@@ -33,7 +32,7 @@ jobs:
 
     services:
       postgres:
-        image: repo/cab_db:latest
+        image: ghcr.io/yoiouz/repo/cab_db:latest
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
