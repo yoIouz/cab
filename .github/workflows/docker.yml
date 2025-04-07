@@ -46,15 +46,12 @@ jobs:
             **/target
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
-      - name: Install common module
-        run: mvn install -pl common -DskipTests
-
       - name: Set DB env
         run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
 
       - name: Run tests for ${{ matrix.module }}
         working-directory: ./${{ matrix.module }}
-        run: mvn test -Dspring.datasource.url=$DATABASE_URL
+        run: mvn clean test -Dspring.datasource.url=$DATABASE_URL
 
   build-and-push:
     needs: test-modules
