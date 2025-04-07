@@ -27,7 +27,7 @@ jobs:
           docker tag $IMAGE_PREFIX/cab_db:latest cab_db:latest
 
   test-modules:
-    needs: registry-login
+    needs: registry-setup
     runs-on: ubuntu-latest
 
     strategy:
