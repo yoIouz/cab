@@ -78,7 +78,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
       - name: Install common module
-        run: mvn install -DskipTests
+        run: mvn install -pl common -DskipTests
 
       - name: Set DB env
         run: echo "DATABASE_URL=jdbc:postgresql://localhost:5432/test" >> $GITHUB_ENV
