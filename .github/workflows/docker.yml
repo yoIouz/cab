@@ -62,8 +62,7 @@ jobs:
           if echo "$CHANGED_FILES" | grep -q "api-gateway/"; then
             SERVICES="$SERVICES api-gateway"
           fi
-
-          echo "::set-output name=services::${SERVICES}"
+          echo "services=${SERVICES}" >> $GITHUB_OUTPUT
 
   test-modules:
     needs: [rename-repo, determine-changes]
