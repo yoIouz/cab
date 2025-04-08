@@ -120,7 +120,6 @@ jobs:
     strategy:
       matrix:
         service: [ "passenger-service", "booking-service", "common", "driver-service", "payment-service", "cloud-config-server", "eureka-server", "api-gateway" ]
-    if: ${{ steps.services-to-build.outputs.services != 'none' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -136,14 +135,8 @@ jobs:
 
       - name: Build and Push
         run: |
-          if [ "${{ steps.services-to-build.outputs.services }}" != "none" ]; then
-            for service in ${{ steps.services-to-build.outputs.services }}; do
-              docker build \
-                --build-arg SERVICE_NAME=${{ matrix.service }} \
-                -t ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest \
-                -f ./${{ matrix.service }}/Dockerfile .
-                docker push ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest
-            done
-          else
-            echo "No changes detected, skipping build."
-          fi
+          docker build \
+               --build-arg SERVICE_NAME=${{ matrix.service }} \
+               -t ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest \
+               -f ./${{ matrix.service }}/Dockerfile .
+          docker push ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest
