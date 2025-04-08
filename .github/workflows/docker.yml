@@ -83,6 +83,14 @@ jobs:
             --build-arg SERVICE_NAME=${{ matrix.service }} \
             -t ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest \
             -f ./Dockerfile .
+
+      - name: Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Push ${{ matrix.service }}
         run: |
           docker push ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest
