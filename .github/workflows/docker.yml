@@ -64,12 +64,13 @@ jobs:
           fi
           
           if [ -z "$SERVICES" ]; then
-            echo "No changes detected, skipping the build steps."
+            echo "No changes detected, skipping build steps."
             echo "services=none" >> $GITHUB_ENV
-            exit 0
+            echo "::set-output name=services::none"
+          else
+            echo "SERVICES=${SERVICES}" >> $GITHUB_ENV
+            echo "::set-output name=services::${SERVICES}"
           fi
-          
-          echo "services=${SERVICES}" >> $GITHUB_OUTPUT
 
   test-modules:
     needs: [rename-repo, determine-changes]
@@ -78,7 +79,6 @@ jobs:
       matrix:
         service: [ "passenger-service", "booking-service", "common", "driver-service", "payment-service", "cloud-config-server", "eureka-server", "api-gateway" ]
       fail-fast: false
-    if: ${{ steps.services-to-build.outputs.services != 'none' }}
     steps:
       - uses: actions/checkout@v4
 
