@@ -1,0 +1,32 @@
+# General
+**/target/
+**/out/
+**/.classpath
+**/.project
+**/.settings/
+**/*.class
+.env
+artemis
+kubernetes
+infrastructure
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.github
+.gitignore
+
+# Logs
+*.log
+
+# Docker
+Dockerfile-db
+Dockerfile
+docker-compose.yml
