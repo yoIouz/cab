@@ -34,13 +34,10 @@ jobs:
       - name: Get changed services
         id: services-to-build
         run: |
-          # Получаем список изменённых файлов с момента последнего коммита
+          git fetch --prune --unshallow
           CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-
-          # Инициализируем строку для сервисов
           SERVICES=""
-
-          # Проверяем, какие сервисы были изменены
+          
           if echo "$CHANGED_FILES" | grep -q "passenger-service/"; then
             SERVICES="passenger-service"
           fi
@@ -66,7 +63,6 @@ jobs:
             SERVICES="$SERVICES api-gateway"
           fi
 
-          # Передаем результат как output для использования в следующем шаге
           echo "::set-output name=services::${SERVICES}"
 
   test-modules:
