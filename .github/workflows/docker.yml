@@ -3,6 +3,8 @@ name: Multi-module CI/CD
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 env:
   GHCR_REGISTRY: ghcr.io
@@ -21,12 +23,58 @@ jobs:
         run: |
           echo "image-prefix=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
+  determine-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services-to-build: ${{ steps.services-to-build.outputs.services }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get changed services
+        id: services-to-build
+        run: |
+          # Получаем список изменённых файлов с момента последнего коммита
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+
+          # Инициализируем строку для сервисов
+          SERVICES=""
+
+          # Проверяем, какие сервисы были изменены
+          if echo "$CHANGED_FILES" | grep -q "passenger-service/"; then
+            SERVICES="passenger-service"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "booking-service/"; then
+            SERVICES="$SERVICES booking-service"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "common/"; then
+            SERVICES="$SERVICES common"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "driver-service/"; then
+            SERVICES="$SERVICES driver-service"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "payment-service/"; then
+            SERVICES="$SERVICES payment-service"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "cloud-config-server/"; then
+            SERVICES="$SERVICES cloud-config-server"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "eureka-server/"; then
+            SERVICES="$SERVICES eureka-server"
+          fi
+          if echo "$CHANGED_FILES" | grep -q "api-gateway/"; then
+            SERVICES="$SERVICES api-gateway"
+          fi
+
+          # Передаем результат как output для использования в следующем шаге
+          echo "::set-output name=services::${SERVICES}"
+
   test-modules:
-    needs: rename-repo
+    needs: [rename-repo, determine-changes]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: ["passenger-service"]
+        module: ${{ fromJson(needs.determine-changes.outputs.services) }}
       fail-fast: false
 
     steps:
@@ -69,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [ "passenger-service" ]
+        service: ${{ fromJson(needs.determine-changes.outputs.services) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +130,15 @@ jobs:
           docker build \
             --build-arg SERVICE_NAME=${{ matrix.service }} \
             -t ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest \
-            -f ./Dockerfile .
+            -f ./${{ matrix.service }}/Dockerfile .
+          
+      - name: Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Push ${{ matrix.service }}
         run: |
           docker push ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest
