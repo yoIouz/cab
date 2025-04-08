@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.project.by.common.constants.dto.PageDto;
 import org.project.by.common.constants.dto.event.RideEvent;
+import org.project.by.common.constants.dto.event.SucceededPaymentEvent;
 import org.project.by.payment.CompletedRideBuilder;
 import org.project.by.payment.SucceededWatcher;
 import org.project.by.payment.dto.TransactionDto;
@@ -16,6 +17,7 @@ import org.project.by.payment.mapper.PaymentMapper;
 import org.project.by.payment.repository.TransactionRepository;
 import org.project.by.payment.repository.UserBalanceRepository;
 import org.project.by.payment.service.impl.PaymentServiceImpl;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +45,9 @@ class PaymentServiceTest {
     @Mock
     TransactionRepository transactionRepository;
 
+    @Mock
+    ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     PaymentServiceImpl paymentService;
 
@@ -67,6 +72,7 @@ class PaymentServiceTest {
         paymentService.processPayment(event);
 
         assertThat(userBalance.getBalance()).isEqualTo(new BigDecimal("400.00"));
+        verify(eventPublisher).publishEvent(any(SucceededPaymentEvent.class));
         verify(userBalanceRepository).save(userBalance);
         verify(transactionRepository).save(any(Transaction.class));
     }

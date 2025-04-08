@@ -85,4 +85,4 @@ jobs:
             -f ./Dockerfile .
       - name: Push ${{ matrix.service }}
         run: |
-          docker push ${{ env.REGISTRY_URL }}/${{ matrix.service }}:latest
+          docker push ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest
