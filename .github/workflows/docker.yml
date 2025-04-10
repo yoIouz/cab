@@ -90,9 +90,8 @@ jobs:
           docker tag ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest cab_db:latest
 
       - name: Run tests
-        env:
-          SERVICES: ${{ needs.determine-changes.outputs.services }}
         run: |
+          SERVICES="${{ needs.determine-changes.outputs.services }}"
           for SERVICE in $SERVICES; do
             echo "🔍 Testing $SERVICE..."
             mvn test -pl $SERVICE -Dspring.datasource.url=$DATABASE_URL
@@ -116,9 +115,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push
-        env:
-          SERVICES: ${{ needs.determine-changes.outputs.services }}
         run: |
+          SERVICES="${{ needs.determine-changes.outputs.services }}"
           for SERVICE in $SERVICES; do
             echo "🐳 Building and pushing $SERVICE..."  
             docker build \
