@@ -48,7 +48,6 @@ public class PaymentServiceImpl implements PaymentService {
         transaction.setUserId(userBalance.getUserId());
         transaction.setAmount(price.negate());
         transaction.setTransactionDate(event.getDate());
-
         userBalanceRepository.save(userBalance);
         Transaction savedTx = transactionRepository.save(transaction);
         SucceededPaymentEvent succeededPaymentEvent =
