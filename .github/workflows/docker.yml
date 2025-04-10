@@ -47,15 +47,9 @@ jobs:
           SERVICES=$(echo "$SERVICES" | xargs)  # trim
           echo "Detected changes: $SERVICES"
 
-          if [ -z "$SERVICES" ]; then
-          echo "services=none" >> $GITHUB_OUTPUT
-          else
-          echo "services=$SERVICES" >> $GITHUB_OUTPUT
-          fi
-
   test-modules:
     needs: [rename-repo, determine-changes]
-    if: needs.determine-changes.outputs.services != ''
+    if: needs.determine-changes.outputs.services != 'none' && needs.determine-changes.outputs.services != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -99,7 +93,7 @@ jobs:
 
   push:
     needs: [test-modules, rename-repo, determine-changes]
-    if: needs.determine-changes.outputs.services != ''
+    if: needs.determine-changes.outputs.services != 'none' && needs.determine-changes.outputs.services != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
