@@ -39,13 +39,14 @@ jobs:
           SERVICES=""
 
           for service in passenger-service booking-service common driver-service payment-service cloud-config-server eureka-server api-gateway; do
-          if echo "$CHANGED_FILES" | grep -q "$service/"; then
-          SERVICES="$SERVICES $service"
-          fi
+            if echo "$CHANGED_FILES" | grep -q "$service/"; then
+              SERVICES="$SERVICES $service"
+            fi
           done
 
           SERVICES=$(echo "$SERVICES" | xargs)  # trim
           echo "Detected changes: $SERVICES"
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
 
   test-modules:
     needs: [rename-repo, determine-changes]
