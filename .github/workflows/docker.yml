@@ -74,6 +74,7 @@ jobs:
 
   test-modules:
     needs: [rename-repo, determine-changes]
+    if: needs.determine-changes.outputs.services-to-build != 'none'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -111,11 +112,12 @@ jobs:
           docker pull ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest
           docker tag ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest cab_db:latest
 
-      - name: Run tests for ${{ matrix.module }}
-        run: mvn clean test -pl ${{ matrix.module }} -Dspring.datasource.url=$DATABASE_URL
+      - name: Run tests
+        run: mvn clean test -pl ${{ needs.determine-changes.outputs.services-to-build }} -Dspring.datasource.url=$DATABASE_URL
 
   push:
-    needs: [test-modules, rename-repo]
+    needs: [test-modules, rename-repo, determine-changes]
+    if: needs.determine-changes.outputs.services-to-build != 'none'
     runs-on: ubuntu-latest
     strategy:
       matrix:
