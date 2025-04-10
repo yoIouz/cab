@@ -9,8 +9,6 @@ on:
 env:
   GHCR_REGISTRY: ghcr.io
   IMAGE_PREFIX: ghcr.io/${{ github.repository }}
-  TESTCONTAINERS_RYUK_DISABLED: "true"
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 jobs:
   rename-repo:
