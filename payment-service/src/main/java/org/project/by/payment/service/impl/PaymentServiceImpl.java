@@ -38,6 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
         BigDecimal price = event.getPrice();
         UserBalance userBalance = userBalanceRepository.findByUserId(passengerId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         if (userBalance.getBalance().compareTo(price) < 0) {
             throw new IllegalArgumentException("Insufficient funds for user " + passengerId);
         }
