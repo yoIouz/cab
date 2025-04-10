@@ -94,7 +94,7 @@ jobs:
             mvn test -pl $SERVICE -Dspring.datasource.url=$DATABASE_URL
           done
 
-  push:
+  build-and-push:
     needs: [test-modules, rename-repo, determine-changes]
     if: needs.determine-changes.outputs.services != 'none' && needs.determine-changes.outputs.services != ''
     runs-on: ubuntu-latest
