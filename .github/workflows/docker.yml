@@ -37,49 +37,26 @@ jobs:
           git fetch --prune --unshallow
           CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
           SERVICES=""
-          
-          if echo "$CHANGED_FILES" | grep -q "passenger-service/"; then
-            SERVICES="passenger-service"
+
+          for service in passenger-service booking-service common driver-service payment-service cloud-config-server eureka-server api-gateway; do
+          if echo "$CHANGED_FILES" | grep -q "$service/"; then
+          SERVICES="$SERVICES $service"
           fi
-          if echo "$CHANGED_FILES" | grep -q "booking-service/"; then
-            SERVICES="$SERVICES booking-service"
-          fi
-          if echo "$CHANGED_FILES" | grep -q "common/"; then
-            SERVICES="$SERVICES common"
-          fi
-          if echo "$CHANGED_FILES" | grep -q "driver-service/"; then
-            SERVICES="$SERVICES driver-service"
-          fi
-          if echo "$CHANGED_FILES" | grep -q "payment-service/"; then
-            SERVICES="$SERVICES payment-service"
-          fi
-          if echo "$CHANGED_FILES" | grep -q "cloud-config-server/"; then
-            SERVICES="$SERVICES cloud-config-server"
-          fi
-          if echo "$CHANGED_FILES" | grep -q "eureka-server/"; then
-            SERVICES="$SERVICES eureka-server"
-          fi
-          if echo "$CHANGED_FILES" | grep -q "api-gateway/"; then
-            SERVICES="$SERVICES api-gateway"
-          fi
-          
+          done
+
+          SERVICES=$(echo "$SERVICES" | xargs)  # trim
+          echo "Detected changes: $SERVICES"
+
           if [ -z "$SERVICES" ]; then
-            echo "No changes detected, skipping build steps."
-            echo "services=none" >> $GITHUB_ENV
-            echo "::set-output name=services::none"
+          echo "services=none" >> $GITHUB_OUTPUT
           else
-            echo "SERVICES=${SERVICES}" >> $GITHUB_ENV
-            echo "::set-output name=services::${SERVICES}"
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
           fi
 
   test-modules:
     needs: [rename-repo, determine-changes]
-    if: needs.determine-changes.outputs.services-to-build != 'none'
+    if: needs.determine-changes.outputs.services != 'none'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [ "passenger-service", "booking-service", "common", "driver-service", "payment-service", "cloud-config-server", "eureka-server", "api-gateway" ]
-      fail-fast: false
     steps:
       - uses: actions/checkout@v4
 
@@ -113,15 +90,18 @@ jobs:
           docker tag ${{ needs.rename-repo.outputs.image-prefix }}/cab_db:latest cab_db:latest
 
       - name: Run tests
-        run: mvn clean test -pl ${{ needs.determine-changes.outputs.services-to-build }} -Dspring.datasource.url=$DATABASE_URL
+        env:
+          SERVICES: ${{ needs.determine-changes.outputs.services }}
+        run: |
+          for SERVICE in $SERVICES; do
+            echo "🔍 Testing $SERVICE..."
+            mvn test -pl $SERVICE -Dspring.datasource.url=$DATABASE_URL
+          done
 
   push:
     needs: [test-modules, rename-repo, determine-changes]
-    if: needs.determine-changes.outputs.services-to-build != 'none'
+    if: needs.determine-changes.outputs.services != 'none'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [ "passenger-service", "booking-service", "common", "driver-service", "payment-service", "cloud-config-server", "eureka-server", "api-gateway" ]
     steps:
       - uses: actions/checkout@v4
 
@@ -136,9 +116,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push
+        env:
+          SERVICES: ${{ needs.determine-changes.outputs.services }}
         run: |
-          docker build \
-               --build-arg SERVICE_NAME=${{ matrix.service }} \
-               -t ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest \
-               -f ./${{ matrix.service }}/Dockerfile .
-          docker push ${{ needs.rename-repo.outputs.image-prefix }}/${{ matrix.service }}:latest
+          for SERVICE in $SERVICES; do
+            echo "🐳 Building and pushing $SERVICE..."  
+            docker build \
+              --build-arg SERVICE_NAME=$SERVICE \
+              -t ${{ needs.rename-repo.outputs.image-prefix }}/$SERVICE:latest \
+              -f Dockerfile .
+            docker push ${{ needs.rename-repo.outputs.image-prefix }}/$SERVICE:latest
+          done
