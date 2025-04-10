@@ -42,6 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (userBalance.getBalance().compareTo(price) < 0) {
             throw new IllegalArgumentException("Insufficient funds for user " + passengerId);
         }
+
         userBalance.setBalance(userBalance.getBalance().subtract(price));
         Transaction transaction = new Transaction();
         transaction.setUserId(userBalance.getUserId());
