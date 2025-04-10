@@ -26,7 +26,7 @@ jobs:
   determine-changes:
     runs-on: ubuntu-latest
     outputs:
-      services-to-build: ${{ steps.services-to-build.outputs.services }}
+      services: ${{ steps.services-to-build.outputs.services }}
 
     steps:
       - uses: actions/checkout@v4
