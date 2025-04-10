@@ -51,7 +51,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         userBalanceRepository.save(userBalance);
         Transaction savedTx = transactionRepository.save(transaction);
-
         SucceededPaymentEvent succeededPaymentEvent =
                 new SucceededPaymentEvent(passengerId, price, paymentMapper.toTransactionReferenceDto(savedTx));
         eventPublisher.publishEvent(succeededPaymentEvent);
