@@ -90,7 +90,7 @@ jobs:
         run: |
           SERVICES="${{ needs.determine-changes.outputs.services }}"
           for SERVICE in $SERVICES; do
-            echo "🔍 Testing $SERVICE..."
+            echo "Testing $SERVICE..."
             mvn test -pl $SERVICE -Dspring.datasource.url=$DATABASE_URL
           done
 
@@ -115,7 +115,7 @@ jobs:
         run: |
           SERVICES="${{ needs.determine-changes.outputs.services }}"
           for SERVICE in $SERVICES; do
-            echo "🐳 Building and pushing $SERVICE..."  
+            echo "Building and pushing $SERVICE..."  
             docker build \
               --build-arg SERVICE_NAME=$SERVICE \
               -t ${{ needs.rename-repo.outputs.image-prefix }}/$SERVICE:latest \
