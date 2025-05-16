@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-19-alpine AS builder
+FROM maven:3.9-eclipse-temurin-21-jdk-alpine AS builder
 ARG SERVICE_NAME
 WORKDIR /app
 COPY . .
