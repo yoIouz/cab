@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . .
 RUN mvn clean package -pl ${SERVICE_NAME} -am -DskipTests
 
-FROM eclipse-temurin:19-jre-jammy
+FROM eclipse-temurin:21-jre-alpine
 ARG SERVICE_NAME
 ENV SERVICE_NAME=${SERVICE_NAME}
 WORKDIR /app
