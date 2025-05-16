@@ -20,7 +20,7 @@ public class BookingConsumer {
     }
 
     @KafkaListener(topics = KafkaConstants.ACCEPTED_RIDES_TOPIC)
-    public void consumeAcceptedRides(BookingRequestEvent ride) {
+    public void consumeAcceptedRides(RideEvent ride) {
         bookingService.updateRideStatus(ride);
     }
 

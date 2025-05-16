@@ -9,5 +9,6 @@ spring:
           private-key: ${SSH_KEY}
           search-paths: /{application}
           default-label: main
+          passphrase: ${PASSPHRASE}
 server:
   port: 8888

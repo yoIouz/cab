@@ -50,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void updateRideStatus(BookingRequestEvent ride) {
+    public void updateRideStatus(RideEvent ride) {
         Ride rideEntity = this.findRideById(ride.getRideId());
         rideEntity.setDriverId(ride.getDriverId());
         rideEntity.setStatus(RideStatus.IN_PROGRESS);

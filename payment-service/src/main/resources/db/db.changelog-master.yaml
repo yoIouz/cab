@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/changeset-3.sql
   - include:
       file: db/changelog/changeset-4.sql
+  - include:
+      file: db/changelog/changeset-5.sql

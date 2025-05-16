@@ -51,7 +51,8 @@ public class AntiFraudStream {
                         Grouped.with(Serdes.String(), StreamSerdes.get(SucceededPaymentEvent.class)));
 
         KTable<Windowed<String>, List<TransactionReferenceDto>> aggregatedTable = groupedStream
-                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(1)).advanceBy(Duration.ofSeconds(1)))
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(1))
+                        .advanceBy(Duration.ofSeconds(1)))
                 .aggregate(
                         ArrayList::new,
                         (key, value, aggList) -> {
@@ -70,10 +71,12 @@ public class AntiFraudStream {
                 .suppress(Suppressed.untilWindowCloses(
                         Suppressed.BufferConfig.maxRecords(IN_WINDOW_MAX_RECORDS).shutDownWhenFull()
                 ))
-                .filter((key, value) -> value.size() > 1)
+                .filter((key, value) ->
+                        value.size() > 1)
                 .toStream()
                 .map((windowedKey, list) ->
-                        KeyValue.pair(windowedKey.key(), createFraudReferenceDto(windowedKey.key(), list)));
+                        KeyValue.pair(windowedKey.key(),
+                                this.createFraudReferenceDto(windowedKey.key(), list)));
 
         suspiciousPayments.to(KafkaConstants.SUSPICIOUS_PAYMENT_TOPIC, Produced.with(Serdes.String(),
                 StreamSerdes.getTypeReferenced()));

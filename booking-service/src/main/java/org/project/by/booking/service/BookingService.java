@@ -10,7 +10,7 @@ public interface BookingService {
 
     void processBookingRequest(BookingRequestEvent bookingRequestEvent);
 
-    void updateRideStatus(BookingRequestEvent ride);
+    void updateRideStatus(RideEvent ride);
 
     void completeRide(RideEvent rideCompleted);
 

@@ -13,8 +13,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>19</maven.compiler.source>
-        <maven.compiler.target>19</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <spring.cloud.starter.openfeign.version>4.2.0</spring.cloud.starter.openfeign.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
         <wiremock.version>3.12.1</wiremock.version>

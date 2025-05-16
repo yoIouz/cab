@@ -30,8 +30,8 @@ public class RideEvent {
     @Positive
     private Long passengerId;
 
-    @Positive
     @NotNull
+    @Positive
     @Digits(integer = 4, fraction = 2)
     private BigDecimal price;
 

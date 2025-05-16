@@ -12,8 +12,8 @@
     <artifactId>driver-service</artifactId>
 
     <properties>
-        <maven.compiler.source>19</maven.compiler.source>
-        <maven.compiler.target>19</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
         <spring.cloud.starter.openfeign.version>4.2.0</spring.cloud.starter.openfeign.version>

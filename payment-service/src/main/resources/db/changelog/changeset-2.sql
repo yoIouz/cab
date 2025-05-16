@@ -6,7 +6,7 @@ drop table if exists invoice;
 create table user_balance
 (
     id      BIGSERIAL PRIMARY KEY,
-    user_id BIGINT         NOT NULL,
+    user_id BIGINT         NOT NULL UNIQUE,
     balance DECIMAL(10, 2) NOT NULL
 );
 
